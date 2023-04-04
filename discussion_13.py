@@ -18,8 +18,9 @@ def setUpDatabase(db_name):
 # TASK 1
 # CREATE TABLE FOR EMPLOYEE INFORMATION IN DATABASE AND ADD INFORMATION
 def create_employee_table(cur, conn):
-    pass
-
+    cur.execute("DROP TABLE IF EXISTS employees")
+    cur.execute("CREATE TABLE employees (employee_id INTEGER PRIMARY KEY, first_name TEXT, last_name TEXT, job_id INTEGER, hire_date TEXT, salary INTEGER)")
+    
 # ADD EMPLOYEE'S INFORMTION TO THE TABLE
 
 def add_employee(filename, cur, conn):
@@ -29,20 +30,40 @@ def add_employee(filename, cur, conn):
     file_data = f.read()
     f.close()
     # THE REST IS UP TO YOU
-    pass
+    json_data = json.loads(file_data)
+    
+    for i in range(len(json_data)):
+        employeeid = json_data[i].get('employee_id')
+        first = json_data[i].get('first_name')
+        last = json_data[i].get('last_name')
+        jobid = json_data[i].get('job_id')
+        hire = json_data[i].get('hire_date')
+        salary = json_data[i].get('salary')
+        cur.execute("INSERT INTO employees (employee_id, first_name, last_name, job_id, hire_date, salary) VALUES (?,?, ?, ?, ?, ?)",(employeeid , first, last, jobid, hire, salary))
+    conn.commit()
+
 
 # TASK 2: GET JOB AND HIRE_DATE INFORMATION
 def job_and_hire_date(cur, conn):
-    pass
+    cur.execute("SELECT employees.hire_date, jobs.job_title FROM employees JOIN jobs ON employees.job_id = jobs.job_id")
+    result = cur.fetchall()
+    return result[0][1]
+
 
 # TASK 3: IDENTIFY PROBLEMATIC SALARY DATA
 # Apply JOIN clause to match individual employees
 def problematic_salary(cur, conn):
-    pass
+    cur.execute("SELECT employees.first_name, employees.last_name FROM employees JOIN jobs ON employees.job_id = jobs.job_id WHERE employees.salary < jobs.min_salary OR employees.salary > jobs.max_salary")
+    result = cur.fetchall()
+    return result
 
 # TASK 4: VISUALIZATION
 def visualization_salary_data(cur, conn):
-    pass
+    cur.execute("SELECT jobs.job_title FROM employees JOIN jobs ON employees.job_id = jobs.job_id")
+    x = cur.fetchall()
+    cur.execute("SELECT employees.salary FROM employees JOIN jobs ON employees.job_id = jobs.job_id")
+    y = cur.fetchall
+    plt.scatter(x, y, color = 'red', marker = 'x')
 
 class TestDiscussion12(unittest.TestCase):
     def setUp(self) -> None:
